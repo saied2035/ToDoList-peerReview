@@ -1,9 +1,18 @@
-/* eslint-disable linebreak-style */
 import { taskCompleted, taskEdit, updateValue } from './events.js';
 
 class ToDoList {
   constructor() {
     this.taskList = [];
+  }
+
+  sortTasks() {
+    this.taskList = this.taskList.map((task, i) => (
+      { index: i + 1, description: task.description, completed: task.completed }
+    ));
+  }
+
+  updateTasks() {
+    window.localStorage.setItem('tasks', JSON.stringify(this.taskList));
   }
 
   createTask(description) {
@@ -15,12 +24,12 @@ class ToDoList {
     checkBox.type = 'checkbox';
     checkBox.className = 'checkbox';
     checkBox.addEventListener('change', (event) => taskCompleted(event, this));
-    const desc = document.createElement('input');
-    desc.className = 'description';
-    desc.value = description;
-    desc.disabled = true;
-    desc.required = true;
-    desc.addEventListener('keydown', (event) => updateValue(event, this));
+    const taskDescription = document.createElement('input');
+    taskDescription.className = 'description';
+    taskDescription.value = description;
+    taskDescription.disabled = true;
+    taskDescription.required = true;
+    taskDescription.addEventListener('keydown', (event) => updateValue(event, this));
     const dotsContainer = document.createElement('span');
     dotsContainer.className = 'dots-container';
     const dots = document.createElement('i');
@@ -28,7 +37,7 @@ class ToDoList {
     dotsContainer.appendChild(dots);
     dotsContainer.addEventListener('click', (event) => taskEdit(event, this));
     li.appendChild(checkBox);
-    li.appendChild(desc);
+    li.appendChild(taskDescription);
     li.appendChild(dotsContainer);
     taskContainer.appendChild(li);
     return index;
@@ -37,13 +46,13 @@ class ToDoList {
   addTask(description) {
     const index = this.createTask(description);
     this.taskList.push({ index, description, completed: false });
-    window.localStorage.setItem('tasks', JSON.stringify(this.taskList));
+    this.updateTasks();
   }
 
   loadTask(task) {
     const index = this.createTask(task.description);
     this.taskList.push({ index, description: task.description, completed: task.completed });
-    window.localStorage.setItem('tasks', JSON.stringify(this.taskList));
+    this.updateTasks();
     const checkBoxes = document.querySelectorAll('.checkbox');
     if (task.completed) {
       checkBoxes[index - 1].click();
@@ -56,24 +65,19 @@ class ToDoList {
 
   removeTask(index) {
     this.taskList.splice(index, 1);
-    this.taskList = this.taskList.map((task, i) => (
-      { index: i + 1, description: task.description, completed: task.completed }
-    ));
-
-    window.localStorage.setItem('tasks', JSON.stringify(this.taskList));
+    this.sortTasks();
+    this.updateTasks();
   }
 
   updateTaskDeskcription(index, value) {
     this.taskList[index].description = value;
-    window.localStorage.setItem('tasks', JSON.stringify(this.taskList));
+    this.updateTasks();
   }
 
   removeCompletedTask() {
     this.taskList = this.taskList.filter((task) => task.completed === false);
-    this.taskList = this.taskList.map((task, i) => (
-      { index: i + 1, description: task.description, completed: task.completed }
-    ));
-    window.localStorage.setItem('tasks', JSON.stringify(this.taskList));
+    this.sortTasks();
+    this.updateTasks();
   }
 }
 const taskList = new ToDoList();

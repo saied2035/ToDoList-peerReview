@@ -1,9 +1,8 @@
-/* eslint-disable linebreak-style */
 import { getTasks, checkTaskStyle } from './functions.js';
 
 export const taskAdd = (event, list) => {
   const input = document.querySelector('#task');
-  const ul = input.parentNode.children[4];
+  const ul = document.querySelector('.list');
   if (!input.value) {
     return;
   }
@@ -15,31 +14,33 @@ export const taskAdd = (event, list) => {
 };
 
 export const taskCompleted = (event, list) => {
-  const checked = !event.target.parentNode.children[1].classList.contains('completed');
   const listOfTasks = document.querySelectorAll('.checkbox');
   const index = Array.from(listOfTasks).indexOf(event.target);
-  event.target.parentNode.classList.toggle('disabled');
-  event.target.parentNode.children[1].classList.toggle('completed');
+  const li = event.target.closest('.task');
+  li.classList.toggle('disabled');
+  const taskDescription = event.target.nextElementSibling;
+  taskDescription.classList.toggle('completed');
+  const checked = taskDescription.classList.contains('completed');
   const tasks = getTasks();
   tasks[index].completed = checked;
   window.localStorage.setItem('tasks', JSON.stringify(tasks));
   list.completeTask(index, checked);
-  checkTaskStyle(event.target.parentNode);
+  checkTaskStyle(li);
 };
 
 export const taskEdit = (event, list) => {
   event.target.classList.toggle('fa-ellipsis-vertical');
   event.target.classList.toggle('fa-trash-can');
-  const task = event.target.parentNode.parentNode;
+  const task = event.target.closest('.task');
+  const taskDescription = task.querySelector('.description');
   if (event.target.classList.contains('fa-trash-can')) {
     task.classList.add('bg-yellow');
-    task.children[1].disabled = false;
+    taskDescription.disabled = false;
   } else {
-    const icons = document.querySelectorAll('.svg-inline--fa');
-    const [, ...iconsArr] = icons;
-    const index = iconsArr.indexOf(event.target);
+    const icons = document.querySelectorAll('li .svg-inline--fa');
+    const index = Array.from(icons).indexOf(event.target);
     task.classList.remove('bg-yellow');
-    task.children[1].disabled = true;
+    taskDescription.disabled = true;
     list.removeTask(index);
     if (!list.taskList.length) {
       task.parentNode.classList.add('dn');
@@ -49,16 +50,17 @@ export const taskEdit = (event, list) => {
 };
 
 export const updateValue = (event, list) => {
-  const iconContainer = event.target.parentNode.children[2];
   if (!event.target.value) {
     event.target.placeholder = "the task shouldn't be empty. Please, add value.";
     return;
   }
   if (event.keyCode === 13) {
     event.target.disabled = true;
-    event.target.parentNode.classList.remove('bg-yellow');
-    iconContainer.children[0].classList.toggle('fa-ellipsis-vertical');
-    iconContainer.children[0].classList.toggle('fa-trash-can');
+    const li = event.target.closest('li');
+    li.classList.remove('bg-yellow');
+    const icon = li.querySelector('.svg-inline--fa');
+    icon.classList.toggle('fa-ellipsis-vertical');
+    icon.classList.toggle('fa-trash-can');
     const descriptions = document.querySelectorAll('.description');
     const index = Array.from(descriptions).indexOf(event.target);
     list.updateTaskDeskcription(index, event.target.value);

@@ -1,13 +1,15 @@
-/* eslint-disable linebreak-style */
 export const getTasks = () => JSON.parse(localStorage.tasks);
+
 export const checkTaskStyle = (task) => {
   if (!task.classList.contains('bg-yellow')) return;
   task.classList.remove('bg-yellow');
-  task.children[1].disabled = true;
-  const iconContainer = task.children[2];
-  iconContainer.children[0].classList.toggle('fa-ellipsis-vertical');
-  iconContainer.children[0].classList.toggle('fa-trash-can');
+  const taskDescription = task.querySelector('.description');
+  taskDescription.disabled = true;
+  const icon = task.querySelector('.svg-inline--fa');
+  icon.classList.toggle('fa-ellipsis-vertical');
+  icon.classList.toggle('fa-trash-can');
 };
+
 export const showToDoList = (taskList) => {
   if (!window.localStorage.tasks) {
     return;
